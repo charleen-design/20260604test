@@ -12108,7 +12108,7 @@ function utShowWrongTargetHint() {
 // ── Configuration ──────────────────────────────────────────
 // REPLACE this URL with your actual Google Apps Script Web App URL
 // Deploy as: "Execute as Me", "Who has access: Anyone"
-const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyIatYlGEM_ltytOwZvPK-ulPnuslq4Z8bsO44CRpzQEkcfKYXEJe8ELbmNGTJ_8L-JjA/exec';
+const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxixeSt3naSrRsoNeto0ZQr3_XytehqLg_acGgCl3z0QlgazwrnpQZ-4jIh5nppmlsYiw/exec';
 
 // ── Session state ──────────────────────────────────────────
 var UT = {
@@ -12228,6 +12228,8 @@ function utTaskComplete() {
   utLog('task1_complete', UT.currentPage, 'Apply / Save (task complete)');
   document.getElementById('ut-float-btns').style.display = 'none';
   document.getElementById('ut-modal-task-complete').style.display = 'flex';
+  // Send immediately so we capture data even if user skips rating
+  utSendData();
 }
 
 // ── Rating ─────────────────────────────────────────────────
@@ -12258,8 +12260,9 @@ function utShowRating(isReview) {
 function utSubmitRating() {
   UT.task1Rating = _currentRating;
   UT.ratingDone = true;
+  console.log('[UT] Rating submitted:', _currentRating);
   utLog('task1_rating', 'rating_modal', 'Done button', { rating: _currentRating });
-  utSendData();
+  utSendData(); // send again with rating included
   document.getElementById('ut-modal-rating').style.display = 'none';
   utReturnHome();
 }
@@ -12330,12 +12333,40 @@ function utClickHandler(e) {
 }
 
 function utGetLabel(el) {
-  // Try to get a human-readable label for the element
-  if (el.id) return el.id;
-  if (el.textContent) {
-    const txt = el.textContent.trim().slice(0, 60);
-    if (txt) return txt;
+  // Known ID → human label map
+  var ID_MAP = {
+    'lmb-curriculum':   'Left nav: Curriculum',
+    'lmb-home':         'Left nav: Home',
+    'lmb-reports':      'Left nav: Reports',
+    'lmb-classes':      'Left nav: Classes',
+    'curr-tab-3a':      'Tab: Class 3A',
+    'curr-tab-3b':      'Tab: Class 3B',
+    'curr-tab-full':    'Tab: Full Curriculum',
+  };
+
+  var id = el.id || '';
+
+  // Translate known IDs
+  if (ID_MAP[id]) return ID_MAP[id];
+
+  // Go Deeper / Core pill buttons  e.g. cu-fab-gd-class2-2
+  if (id.match(/^cu-fab-gd-(.+)-(\d+)$/)) {
+    var m = id.match(/^cu-fab-gd-(.+)-(\d+)$/);
+    var cls = m[1] === 'class1' ? '3A' : m[1] === 'class2' ? '3B' : m[1];
+    return 'Pill: Go Deeper (' + cls + ' Unit ' + m[2] + ')';
   }
+  if (id.match(/^cu-fab-std-(.+)-(\d+)$/)) {
+    var m2 = id.match(/^cu-fab-std-(.+)-(\d+)$/);
+    var cls2 = m2[1] === 'class1' ? '3A' : m2[1] === 'class2' ? '3B' : m2[1];
+    return 'Pill: Core (' + cls2 + ' Unit ' + m2[2] + ')';
+  }
+
+  // Prefer text content over id
+  var txt = el.textContent ? el.textContent.trim().replace(/\s+/g, ' ').slice(0, 50) : '';
+  if (txt && txt.length > 1) return txt;
+
+  // Fall back to id, title, aria-label
+  if (id) return 'id:' + id;
   if (el.title) return el.title;
   if (el.getAttribute('aria-label')) return el.getAttribute('aria-label');
   return el.tagName.toLowerCase();
@@ -12395,33 +12426,30 @@ function utLog(event, page, element, extra) {
 
 // ── Send data to Google Sheets ─────────────────────────────
 function utSendData() {
-  // Page duration: close current page
-  if (UT.currentPage && UT.pageStarts[UT.currentPage]) {
-    var spent = Date.now() - UT.pageStarts[UT.currentPage];
-    UT.pageDurations[UT.currentPage] = (UT.pageDurations[UT.currentPage] || 0) + spent;
-  }
+  console.log('[UT] utSendData called, status:', UT.task1Status);
 
   var totalTime = UT.task1End && UT.task1Start ? UT.task1End - UT.task1Start : null;
   var firstClickTime = UT.task1FirstClick && UT.task1Start ? UT.task1FirstClick - UT.task1Start : null;
 
-  // Keep clickLog short to avoid URL length limits
-  var clickSummary = UT.clickLog.slice(-50).map(function(e) {
-    return e.event + '|' + e.page + '|' + (e.element || '').slice(0, 40);
+  // Build click log with dwell time = ms until next click
+  var log = UT.clickLog.slice(-80);
+  var clickSummary = log.map(function(e, i) {
+    var dwell = i < log.length - 1 ? (log[i + 1].ts - e.ts) : 0;
+    return e.event + '|' + e.page + '|' + (e.element || '').slice(0, 40) + '|' + dwell + 'ms';
   }).join(';');
 
   var payload = {
-    sessionId:           UT.sessionId,
-    timestamp:           new Date().toISOString(),
-    participantName:     UT.participantName,
-    grades:              UT.grades.join(', '),
-    task1Status:         UT.task1Status,
-    task1Rating:         UT.task1Rating || '',
-    task1AbandonReason:  UT.task1AbandonReason || '',
-    task1TotalTimeMs:    totalTime || '',
-    task1FirstClickMs:   firstClickTime || '',
-    totalClicks:         UT.totalClicks,
-    pageDurations:       JSON.stringify(UT.pageDurations),
-    clickLog:            clickSummary,
+    sessionId:          UT.sessionId,
+    timestamp:          new Date().toISOString(),
+    participantName:    UT.participantName,
+    grades:             UT.grades.join(', '),
+    task1Status:        UT.task1Status,
+    task1Rating:        UT.task1Rating || '',
+    task1AbandonReason: UT.task1AbandonReason || '',
+    task1TotalTimeMs:   totalTime || '',
+    task1FirstClickMs:  firstClickTime || '',
+    totalClicks:        UT.totalClicks,
+    clickLog:           clickSummary,
   };
 
   console.log('[UT] Sending data:', payload);
@@ -12430,18 +12458,15 @@ function utSendData() {
     return encodeURIComponent(k) + '=' + encodeURIComponent(payload[k]);
   }).join('&');
 
-  // Method 1: fetch no-cors POST with URL params (most reliable for Apps Script)
-  fetch(UT_SHEET_URL + '?' + params, {
-    method: 'POST',
-    mode: 'no-cors',
-  }).then(function() {
-    console.log('[UT] Data sent successfully');
-  }).catch(function(err) {
-    console.warn('[UT] fetch failed, trying image beacon:', err);
-    // Method 2: image beacon fallback
-    var img = new Image();
-    img.src = UT_SHEET_URL + '?' + params;
-  });
+  // Pure GET — most reliable with Apps Script
+  fetch(UT_SHEET_URL + '?' + params, { method: 'GET', mode: 'no-cors' })
+    .then(function() {
+      console.log('[UT] Data sent successfully');
+    }).catch(function(err) {
+      console.warn('[UT] fetch failed, trying image beacon:', err);
+      var img = new Image();
+      img.src = UT_SHEET_URL + '?' + params;
+    });
 }
 
 // ── Toast helper ───────────────────────────────────────────
