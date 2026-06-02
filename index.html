@@ -8508,6 +8508,24 @@ function standalonePacingCalendarVerC(classId) {
   function confirmFluency3B() {
     document.getElementById('fluency3BConfirmContent').style.display = 'none';
     document.getElementById('fluency3BDoneMessage').style.display = 'block';
+
+    const duration = startTime ? ((Date.now() - startTime) / 1000).toFixed(1) : null;
+
+    const payload = {
+      participant: PARTICIPANT_ID,
+      duration_sec: duration,
+      total_clicks: clickLog.length,
+      clicks: clickLog
+    };
+
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(err => console.error('Tracking error:', err));
+
+    console.log('📊 Sent:', payload);
   }
   function cancelFluency3B() {
     document.getElementById('fluency3BConfirmModal').style.display = 'none';
@@ -8797,8 +8815,8 @@ function standalonePacingCalendarVerC(classId) {
   // ═══════════════════════════════════════
   // TRACKING CONFIG
   // ═══════════════════════════════════════
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyfj4eqNTwp187fgXm2zl3fact21Q9O_fwb28OwkxK1FN0-uGslMhncGaKvIHwvLh-ZQw/exec';
-  const PARTICIPANT_ID = 'P01';               // 👈 每位参与者测试前改这里
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzcsrBTYv6jBAm7qCUBc3keQ09G7rleDX9BRcLq0V73h82cIDURxI-OfeQd22UnptTmdg/exec';
+  const PARTICIPANT_ID = prompt('请输入你的名字：') || 'unknown';
 
   // ═══════════════════════════════════════
   // TRACKING ENGINE
