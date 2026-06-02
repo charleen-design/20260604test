@@ -4520,7 +4520,8 @@ function _cuSavePath(classId, uid) {
   }
 
   // ── Usability test hook: detect task completion ──
-  if (typeof utTaskComplete === 'function' && window.UT && UT.task1Status === 'in_progress') {
+  console.log('[UT hook] _cuSavePath called:', classId, uid, 'finalIsGD:', finalIsGD, 'task1Status:', typeof UT !== 'undefined' && UT.task1Status);
+  if (typeof utTaskComplete === 'function' && typeof UT !== 'undefined' && UT.task1Status === 'in_progress') {
     if (classId === 'class2' && uid === 2 && finalIsGD) {
       // ✅ Correct: 3B Unit 2 Go Deeper → task complete
       setTimeout(function() { utTaskComplete(); }, 200);
@@ -12110,7 +12111,7 @@ function utShowWrongTargetHint() {
 const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyQAu8rqhlYPbkqN-BnJZdImn3pASZKliwzhJxun3nP20goa8y1VDbF-coC3V7wt0S4vQ/exec';
 
 // ── Session state ──────────────────────────────────────────
-const UT = {
+var UT = {
   sessionId: 'ut_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
   participantName: '',
   grades: [],
@@ -12396,39 +12397,35 @@ function utLog(event, page, element, extra) {
 function utSendData() {
   // Page duration: close current page
   if (UT.currentPage && UT.pageStarts[UT.currentPage]) {
-    const spent = Date.now() - UT.pageStarts[UT.currentPage];
+    var spent = Date.now() - UT.pageStarts[UT.currentPage];
     UT.pageDurations[UT.currentPage] = (UT.pageDurations[UT.currentPage] || 0) + spent;
   }
 
-  const totalTime = UT.task1End && UT.task1Start ? UT.task1End - UT.task1Start : null;
-  const firstClickTime = UT.task1FirstClick && UT.task1Start ? UT.task1FirstClick - UT.task1Start : null;
+  var totalTime = UT.task1End && UT.task1Start ? UT.task1End - UT.task1Start : null;
+  var firstClickTime = UT.task1FirstClick && UT.task1Start ? UT.task1FirstClick - UT.task1Start : null;
 
-  const payload = {
+  var payload = {
     sessionId: UT.sessionId,
     timestamp: new Date().toISOString(),
     participantName: UT.participantName,
     grades: UT.grades.join(', '),
     task1Status: UT.task1Status,
-    task1Rating: UT.task1Rating,
-    task1AbandonReason: UT.task1AbandonReason,
-    task1TotalTimeMs: totalTime,
-    task1FirstClickMs: firstClickTime,
+    task1Rating: UT.task1Rating || '',
+    task1AbandonReason: UT.task1AbandonReason || '',
+    task1TotalTimeMs: totalTime || '',
+    task1FirstClickMs: firstClickTime || '',
     totalClicks: UT.totalClicks,
     pageDurations: JSON.stringify(UT.pageDurations),
-    clickLog: JSON.stringify(UT.clickLog.slice(-200)), // last 200 events
+    clickLog: JSON.stringify(UT.clickLog.slice(-200)),
   };
 
-  if (UT_SHEET_URL.includes('YOUR_SCRIPT_ID_HERE')) {
-    console.log('[UT] Data would be sent to Google Sheets:', payload);
-    return;
-  }
+  // Use Image beacon — bypasses CORS entirely
+  var params = Object.keys(payload).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(payload[k]);
+  }).join('&');
 
-  fetch(UT_SHEET_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  }).catch(err => console.warn('[UT] Sheet write failed:', err));
+  var img = new Image();
+  img.src = UT_SHEET_URL + '?' + params;
 }
 
 // ── Toast helper ───────────────────────────────────────────
