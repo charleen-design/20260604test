@@ -12108,7 +12108,7 @@ function utShowWrongTargetHint() {
 // ── Configuration ──────────────────────────────────────────
 // REPLACE this URL with your actual Google Apps Script Web App URL
 // Deploy as: "Execute as Me", "Who has access: Anyone"
-const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxixeSt3naSrRsoNeto0ZQr3_XytehqLg_acGgCl3z0QlgazwrnpQZ-4jIh5nppmlsYiw/exec';
+const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxc0V_DdnJ2vZlJdGxMRCoBGndIvddFbaMY1Fk7wXtVtCPwI1fxNHVTDctlr8q_dcCreg/exec';
 
 // ── Session state ──────────────────────────────────────────
 var UT = {
@@ -12222,14 +12222,12 @@ function utSubmitEndFeedback() {
 
 // ── Task complete ──────────────────────────────────────────
 function utTaskComplete() {
-  if (UT.task1Status === 'completed') return; // prevent double-fire
+  if (UT.task1Status === 'completed') return;
   UT.task1End = Date.now();
   UT.task1Status = 'completed';
   utLog('task1_complete', UT.currentPage, 'Apply / Save (task complete)');
   document.getElementById('ut-float-btns').style.display = 'none';
   document.getElementById('ut-modal-task-complete').style.display = 'flex';
-  // Send immediately so we capture data even if user skips rating
-  utSendData();
 }
 
 // ── Rating ─────────────────────────────────────────────────
