@@ -12108,7 +12108,7 @@ function utShowWrongTargetHint() {
 // ── Configuration ──────────────────────────────────────────
 // REPLACE this URL with your actual Google Apps Script Web App URL
 // Deploy as: "Execute as Me", "Who has access: Anyone"
-const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyQAu8rqhlYPbkqN-BnJZdImn3pASZKliwzhJxun3nP20goa8y1VDbF-coC3V7wt0S4vQ/exec';
+const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbz3NzmfWiSdG9P2PfV643HJGnmSalqoQNkGdhy3q6cuSeiS3p6_RqsEusXV1UnebhFo_Q/exec';
 
 // ── Session state ──────────────────────────────────────────
 var UT = {
@@ -12404,28 +12404,44 @@ function utSendData() {
   var totalTime = UT.task1End && UT.task1Start ? UT.task1End - UT.task1Start : null;
   var firstClickTime = UT.task1FirstClick && UT.task1Start ? UT.task1FirstClick - UT.task1Start : null;
 
+  // Keep clickLog short to avoid URL length limits
+  var clickSummary = UT.clickLog.slice(-50).map(function(e) {
+    return e.event + '|' + e.page + '|' + (e.element || '').slice(0, 40);
+  }).join(';');
+
   var payload = {
-    sessionId: UT.sessionId,
-    timestamp: new Date().toISOString(),
-    participantName: UT.participantName,
-    grades: UT.grades.join(', '),
-    task1Status: UT.task1Status,
-    task1Rating: UT.task1Rating || '',
-    task1AbandonReason: UT.task1AbandonReason || '',
-    task1TotalTimeMs: totalTime || '',
-    task1FirstClickMs: firstClickTime || '',
-    totalClicks: UT.totalClicks,
-    pageDurations: JSON.stringify(UT.pageDurations),
-    clickLog: JSON.stringify(UT.clickLog.slice(-200)),
+    sessionId:           UT.sessionId,
+    timestamp:           new Date().toISOString(),
+    participantName:     UT.participantName,
+    grades:              UT.grades.join(', '),
+    task1Status:         UT.task1Status,
+    task1Rating:         UT.task1Rating || '',
+    task1AbandonReason:  UT.task1AbandonReason || '',
+    task1TotalTimeMs:    totalTime || '',
+    task1FirstClickMs:   firstClickTime || '',
+    totalClicks:         UT.totalClicks,
+    pageDurations:       JSON.stringify(UT.pageDurations),
+    clickLog:            clickSummary,
   };
 
-  // Use Image beacon — bypasses CORS entirely
+  console.log('[UT] Sending data:', payload);
+
   var params = Object.keys(payload).map(function(k) {
     return encodeURIComponent(k) + '=' + encodeURIComponent(payload[k]);
   }).join('&');
 
-  var img = new Image();
-  img.src = UT_SHEET_URL + '?' + params;
+  // Method 1: fetch no-cors POST with URL params (most reliable for Apps Script)
+  fetch(UT_SHEET_URL + '?' + params, {
+    method: 'POST',
+    mode: 'no-cors',
+  }).then(function() {
+    console.log('[UT] Data sent successfully');
+  }).catch(function(err) {
+    console.warn('[UT] fetch failed, trying image beacon:', err);
+    // Method 2: image beacon fallback
+    var img = new Image();
+    img.src = UT_SHEET_URL + '?' + params;
+  });
 }
 
 // ── Toast helper ───────────────────────────────────────────
