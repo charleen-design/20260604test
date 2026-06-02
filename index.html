@@ -12002,13 +12002,17 @@ function _showPacingLessonModal(unitId, si, li) {
       <div style="font-size:16px;font-weight:800;color:#203C53">Task 1 Instructions</div>
       <button onclick="document.getElementById('ut-modal-instruction-inline').style.display='none'" style="width:28px;height:28px;border-radius:50%;border:none;background:#f1f0ee;cursor:pointer;font-size:16px;color:#525152;display:flex;align-items:center;justify-content:center">×</button>
     </div>
-    <div style="background:#EEF8FA;border:1.5px solid #B3DDE8;border-radius:10px;padding:16px 18px;">
+    <div style="background:#EEF8FA;border:1.5px solid #B3DDE8;border-radius:10px;padding:16px 18px;margin-bottom:20px">
       <p style="font-size:14px;color:#203C53;line-height:1.65;margin:0">
         You are teaching <strong>class 3A</strong> and <strong>class 3B</strong>. You realize that <strong>class 3B</strong> has been doing really well with Unit 3: Multiplication, and will need some extra challenge.
       </p>
       <p style="font-size:14px;color:#203C53;line-height:1.65;margin:12px 0 0">
         Find <strong>Class 3B's curriculum</strong>, find <strong>Unit 2</strong>, and switch <strong>"Standard"</strong> to <strong>"Go Deeper"</strong> for your students.
       </p>
+    </div>
+    <div style="border-top:1px solid #ebe9e5;padding-top:16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:#9d9b96">Can't complete the task?</span>
+      <button class="ut-btn-danger" style="font-size:13px;padding:8px 18px" onclick="document.getElementById('ut-modal-instruction-inline').style.display='none';utRequestEndTask()">End Task</button>
     </div>
   </div>
 </div>
@@ -12086,10 +12090,6 @@ function utShowWrongTargetHint() {
 }
 </script>
 <div id="ut-float-btns" style="display:none">
-  <button class="ut-float-btn ut-float-btn-end" onclick="utRequestEndTask()">
-    <svg viewBox="0 0 14 14" style="width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
-    End Task
-  </button>
   <button class="ut-float-btn ut-float-btn-task" onclick="utShowTaskInstructionInline()">
     <svg viewBox="0 0 14 14" style="width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><rect x="1" y="1" width="12" height="12" rx="1.5"/><line x1="4" y1="5" x2="10" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="11" x2="7" y2="11"/></svg>
     Task 1 Instructions
