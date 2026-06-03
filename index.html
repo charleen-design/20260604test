@@ -434,7 +434,7 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
 }
 
 /* .nav-item — simplified sidebar text row (curriculum nav, no card chrome).
-   Used by Class 3A/3B sidebar and Full Curriculum sidebar.
+   Used by Class 3A/3B sidebar and Curriculum Catalog sidebar.
    Plain text + optional left accent line on selection. Status pill inline.
 */
 .nav-item {
@@ -1845,9 +1845,9 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
         </button>
 
         <button id="lmb-classes" class="lmb-nav-item" onclick="switchLeftMenu('classes')">
-          <span class="material-symbols-outlined">group</span>
-          <span>Classes</span>
-          <span class="lmb-tooltip">Classes</span>
+          <span class="material-symbols-outlined">settings</span>
+          <span>Settings</span>
+          <span class="lmb-tooltip">Settings</span>
         </button>
 
       </div>
@@ -1867,7 +1867,7 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
     <!-- Curriculum View (nav sidebar + main content) -->
     <div id="curriculum-view" style="display:none;flex:1;flex-direction:column;overflow:hidden">
 
-    <!-- Top bar with title + 3 tabs -->
+    <!-- Top bar with title + 2 tabs + Curriculum Catalog button -->
     <div style="background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;height:54px;padding:0 20px;gap:12px">
         <span style="font-size:var(--fs-h2);font-weight:var(--fw-black);color:var(--t1);white-space:nowrap;flex-shrink:0">Curriculum</span>
         <div id="curr-tab-bar" style="display:flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:3px;flex-shrink:0">
@@ -1877,12 +1877,8 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
           <button class="curr-tab" id="curr-tab-3b" onclick="switchCurrTab('3b')">
             <span class="curr-tab-dot" style="background:#3C3489"></span>Class 3B
           </button>
-          <button class="curr-tab" id="curr-tab-full" onclick="switchCurrTab('full')">
-            <svg viewBox="0 0 14 14" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0"><rect x="1" y="1" width="5" height="12" rx="1"/><rect x="8" y="1" width="5" height="6" rx="1"/><rect x="8" y="9" width="5" height="4" rx="1"/></svg>
-            Full Curriculum
-          </button>
         </div>
-        <!-- Grade pills: only visible when Full Curriculum is active -->
+        <!-- Grade pills: only visible when Curriculum Catalog is active -->
         <div id="curr-grade-pills" style="display:none;align-items:center;gap:6px">
           <div style="width:1px;height:18px;background:var(--bd);margin-right:4px"></div>
           <button id="curr-gpill-1" onclick="switchFullGrade(1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--bd);background:var(--bg2);font-size:var(--fs-meta);font-weight:var(--fw-bold);color:var(--t2);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center">G1</button>
@@ -1891,6 +1887,15 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
           <button id="curr-gpill-4" onclick="switchFullGrade(4)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--bd);background:var(--bg2);font-size:var(--fs-meta);font-weight:var(--fw-bold);color:var(--t2);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center">G4</button>
           <button id="curr-gpill-5" onclick="switchFullGrade(5)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--bd);background:var(--bg2);font-size:var(--fs-meta);font-weight:var(--fw-bold);color:var(--t2);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center">G5</button>
         </div>
+        <!-- Spacer -->
+        <div style="flex:1"></div>
+        <!-- Curriculum Catalog button -->
+        <button onclick="switchCurrTab('full')" style="display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg);color:var(--t2);font-size:var(--fs-body);font-weight:var(--fw-medium);cursor:pointer;transition:all .14s;white-space:nowrap"
+          onmouseover="this.style.borderColor='var(--navy-400)';this.style.color='var(--navy-800)';this.style.background='var(--bg2)'"
+          onmouseout="this.style.borderColor='var(--bd)';this.style.color='var(--t2)';this.style.background='var(--bg)'">
+          <svg viewBox="0 0 14 14" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0"><rect x="1" y="1" width="5" height="12" rx="1"/><rect x="8" y="1" width="5" height="6" rx="1"/><rect x="8" y="9" width="5" height="4" rx="1"/></svg>
+          Curriculum Catalog
+        </button>
     </div>
 
     <!-- Content area: unit sequence strip + detail below (for 3a/3b tabs) -->
@@ -1920,12 +1925,12 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
       <div id="curr-path-selection" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
         <div style="background:var(--bg);flex-shrink:0;border-bottom:1px solid var(--bd)">
           <div style="width:100%;padding:0 20px;height:44px;display:flex;align-items:center">
-            <span style="font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--t3)">Full Curriculum</span>
+            <span style="font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--t3)">Curriculum Catalog</span>
           </div>
         </div>
         <div style="flex:1;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 24px">
           <div style="width:100%;max-width:720px">
-            <div style="font-size:var(--fs-h1-display);font-weight:var(--fw-black);color:var(--t1);margin-bottom:6px;letter-spacing:var(--ls-tight)">Full Curriculum</div>
+            <div style="font-size:var(--fs-h1-display);font-weight:var(--fw-black);color:var(--t1);margin-bottom:6px;letter-spacing:var(--ls-tight)">Curriculum Catalog</div>
             <div style="font-size:var(--fs-body);color:var(--t2);margin-bottom:32px">Choose a learning path to explore curriculum materials.</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
               <div onclick="_enterPath('core')" style="cursor:pointer;border-radius:var(--rad-xl);border:2px solid var(--bd);background:#fff;padding:28px 24px;display:flex;flex-direction:column;gap:16px;transition:all .18s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='var(--navy-500)';this.style.boxShadow='0 4px 16px rgba(28,58,74,.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--bd)';this.style.boxShadow='none';this.style.transform='none'">
@@ -2064,7 +2069,7 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
   <div id="classes-page" style="display:none;flex:1;flex-direction:column;overflow:hidden;background:var(--bg2)">
     <!-- Top bar: class toggle -->
     <div style="background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;padding:0 20px;height:54px;gap:12px">
-      <span style="font-size:var(--fs-h2);font-weight:var(--fw-black);color:var(--t1);white-space:nowrap;flex-shrink:0">Classes</span>
+      <span style="font-size:var(--fs-h2);font-weight:var(--fw-black);color:var(--t1);white-space:nowrap;flex-shrink:0">Settings</span>
       <div id="classes-toggle" style="display:flex;gap:4px;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:3px">
         <button id="classtab-class1" class="curr-tab active" onclick="switchClassesTab('class1')">
           <span class="curr-tab-dot" style="background:var(--ba-navy-secondary)"></span>Class 3A
@@ -2721,14 +2726,14 @@ function switchFullGrade(gradeNum) {
     pill.style.borderColor = active ? 'var(--navy-900)' : 'var(--bd)';
   });
 
-  // (Grade dropdown removed — title stays "Full Curriculum")
+  // (Grade dropdown removed — title stays "Curriculum Catalog")
 
   _renderFullUnitBar(gradeNum);
   _renderFullBody(gradeNum, null);
 }
 
 /* ════════════════════════════════════════════════════════════════
-   Layer 1 / Layer 2 navigation for Full Curriculum
+   Layer 1 / Layer 2 navigation for Curriculum Catalog
    ════════════════════════════════════════════════════════════════ */
 
 // Authoritative grade catalog. Numeric grades 1-5 use D[] data when present.
@@ -8608,7 +8613,7 @@ function renderClassesPage(classId) {
           </div>
           <div id="cdpnav-students-settings" class="nav-item nav-item--label-only" style="--nav-accent:${clsColor};height:56px" onclick="switchClassDetailTab('${classId}','students-settings')">
             <div class="nav-item__head">
-              <span class="nav-item__label">Class Settings</span>
+              <span class="nav-item__label">Class Profile</span>
             </div>
           </div>
         </div>
@@ -8688,7 +8693,7 @@ function showClassDetailPage(classId) {
           <div id="cdpnav-students-settings" onclick="switchClassDetailTab('${classId}','students-settings')"
             style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:all .1s;font-size:var(--fs-body);font-weight:var(--fw-regular);color:var(--t2)">
             <svg viewBox="0 0 14 14" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0"><circle cx="7" cy="7" r="2"/><path d="M7 1.5v1.2M7 11.3v1.2M1.5 7h1.2M11.3 7h1.2M3.3 3.3l.85.85M9.85 9.85l.85.85M3.3 10.7l.85-.85M9.85 4.15l.85-.85"/></svg>
-            Class Settings
+            Class Profile
           </div>
         </div>
       </div>
@@ -9073,7 +9078,7 @@ function renderClassOverviewTab(classId, body) {
               'Password Management', 'Reset student passwords')
           + mgmtRow("_ov_tab_"+classId+"('students-settings')",
               '<svg viewBox="0 0 14 14" style="width:12px;height:12px;stroke:'+clsColor+';fill:none;stroke-width:1.6;stroke-linecap:round"><circle cx="7" cy="7" r="2"/><path d="M7 1.5v1M7 11.5v1M1.5 7h1M11.5 7h1M3.3 3.3l.7.7M10 10l.7.7M3.3 10.7l.7-.7M10 4l.7-.7"/></svg>',
-              'Class Settings', 'Manage preferences')
+              'Class Profile', 'Manage preferences')
         )
     + '</div>'
     + '</div>'
@@ -10729,29 +10734,7 @@ function renderHomeClasses() {
             </div>
           </div>
 
-          <!-- Class Management -->
-          <div>
-            <div style="font-size:var(--fs-body);font-weight:var(--fw-bold);color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;padding-left:2px">Class Management</div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              ${classes.map(cls => {
-                const clsColor = cls.color;
-                const studentCount = STUDENTS[cls.id] ? STUDENTS[cls.id].length : cls.students;
-                return `<div onclick="switchToClass('${cls.id}')"
-                  style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1.5px solid var(--bd);border-radius:var(--rad-xl);cursor:pointer;transition:all .18s"
-                  onmouseover="this.style.borderColor='${clsColor}';this.style.boxShadow='0 4px 14px rgba(30,82,120,.09)';this.style.transform='translateY(-1px)'"
-                  onmouseout="this.style.borderColor='var(--bd)';this.style.boxShadow='none';this.style.transform='none'">
-                  <div style="width:40px;height:40px;border-radius:50%;background:${clsColor};display:flex;align-items:center;justify-content:center;font-size:var(--fs-meta);font-weight:var(--fw-black);color:#fff;flex-shrink:0">${cls.label}</div>
-                  <div style="flex:1;min-width:0">
-                    <div style="font-size:var(--fs-body);font-weight:var(--fw-bold);color:var(--navy-900);margin-bottom:2px">${cls.name}</div>
-                    <div style="font-size:var(--fs-body);color:var(--t3)">Grade 3 · ${studentCount} students</div>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-                    <svg viewBox="0 0 14 14" style="width:13px;height:13px;stroke:var(--gray-400);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 3l4 4-4 4"/></svg>
-                  </div>
-                </div>`;
-              }).join('')}
-            </div>
-          </div>
+          <!-- (Class Management removed) -->
 
         </div>
       </div>
@@ -11162,7 +11145,7 @@ function renderClassStudentsTab(classId, body) {
           <svg viewBox="0 0 18 18" style="width:16px;height:16px;stroke:var(--navy-700);fill:none;stroke-width:1.6"><circle cx="9" cy="9" r="2.5"/><path d="M9 2v1.5M9 14.5V16M2 9h1.5M14.5 9H16M4.1 4.1l1.1 1.1M12.8 12.8l1.1 1.1M4.1 13.9l1.1-1.1M12.8 5.2l1.1-1.1"/></svg>
         </div>
         <div>
-          <div style="font-size:var(--fs-body);font-weight:var(--fw-bold);color:var(--navy-900)">Class Settings</div>
+          <div style="font-size:var(--fs-body);font-weight:var(--fw-bold);color:var(--navy-900)">Class Profile</div>
           <div style="font-size:var(--fs-body);color:var(--t3);margin-top:2px">Manage class name, grade, and preferences</div>
         </div>
         <svg viewBox="0 0 8 12" style="width:7px;height:11px;stroke:var(--gray-400);fill:none;stroke-width:2;stroke-linecap:round;margin-left:auto;flex-shrink:0"><path d="M1 1l5 5-5 5"/></svg>
@@ -11582,17 +11565,6 @@ function renderClassSettingsTab(classId, body) {
         </div>
       </div>
 
-      <!-- Archive class -->
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--rad-xl);padding:20px 22px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-          <div>
-            <div style="font-size:var(--fs-body);font-weight:var(--fw-bold);color:var(--gray-900);margin-bottom:3px">Archive Class</div>
-            <div style="font-size:var(--fs-body);color:var(--t3);line-height:var(--lh-relaxed)">Hide this class from active view. Students will retain their progress and accounts.</div>
-          </div>
-          <button style="padding:8px 16px;border-radius:var(--rad-card);border:1.5px solid var(--bd2);background:var(--gray-50);color:var(--t2);font-size:var(--fs-body);font-weight:var(--fw-medium);cursor:pointer;white-space:nowrap;transition:all .15s" onmouseover="this.style.borderColor='var(--ba-red-primary)';this.style.color='var(--ba-red-primary)'" onmouseout="this.style.borderColor='var(--bd2)';this.style.color='var(--t2)'">Archive</button>
-        </div>
-      </div>
-
       <!-- Save button -->
       <div style="display:flex;justify-content:flex-end;gap:10px">
         <button style="padding:9px 20px;border-radius:var(--rad-card);border:1px solid var(--bd2);background:var(--gray-50);color:var(--t2);font-size:var(--fs-body);font-weight:var(--fw-medium);cursor:pointer">Cancel</button>
@@ -11931,14 +11903,15 @@ function _showPacingLessonModal(unitId, si, li) {
       <div style="background:#f5f4f3;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
         <div style="display:flex;gap:10px;align-items:flex-start">
           <span style="font-size:13px;font-weight:700;background:#203C53;color:#fff;padding:2px 8px;border-radius:20px;flex-shrink:0;margin-top:1px">Core</span>
-          <span>A <strong>Core</strong> unit follows the standard curriculum you're already familiar with.</span>
+          <span>Follows the standard curriculum your students are already working through. This is the default for all classes.</span>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
           <span style="font-size:13px;font-weight:700;background:#065F46;color:#fff;padding:2px 8px;border-radius:20px;flex-shrink:0;margin-top:1px">Go Deeper</span>
-          <span>A <strong>Go Deeper</strong> unit marks 4 lessons as skippable and adds 4 enrichment lessons for students who are ready for more challenges.</span>
+          <span>Marks 4 lessons as skippable and adds 4 enrichment lessons for classes that are ready for more challenge.</span>
         </div>
       </div>
-      <p style="margin:0">For every unit you teach, you can choose a version for each class. Today, we'd like to see if our interface is intuitive for you to easily switch between these two versions.</p>
+      <p style="margin:0 0 10px">You can set a version <strong>per class, per unit</strong> — it's a whole-class setting. Once you make a change, all students in that class will see the updated view in their student portal.</p>
+      <p style="margin:0">Today, we'd like to see if our interface makes it easy to switch between these two versions.</p>
     </div>
     <div style="display:flex;justify-content:flex-end">
       <button class="ut-btn-primary" onclick="utShowTaskInstruction()">Next →</button>
@@ -11960,10 +11933,10 @@ function _showPacingLessonModal(unitId, si, li) {
     </div>
     <div style="background:#EEF8FA;border:1.5px solid #B3DDE8;border-radius:10px;padding:16px 18px;margin-bottom:24px">
       <p style="font-size:15px;color:#203C53;line-height:1.65;margin:0">
-        You are teaching <strong>class 3A</strong> and <strong>class 3B</strong>. You realize that <strong>class 3B</strong> has been doing really well with Unit 3: Multiplication, and will need some extra challenge.
+        You just finished teaching Unit 1 to <strong>Class 3A</strong> and <strong>Class 3B</strong>. You realize that <strong>Class 3B</strong> has been doing really well, and will need some extra challenge for the next unit: <strong>Unit 2 — Multiplication</strong>.
       </p>
       <p style="font-size:15px;color:#203C53;line-height:1.65;margin:14px 0 0">
-        Find <strong>Class 3B's curriculum</strong>, find <strong>Unit 2</strong>, and switch <strong>"Standard"</strong> to <strong>"Go Deeper"</strong> for your students.
+        Find <strong>Class 3B's curriculum</strong>, find <strong>Unit 2</strong>, and switch <strong>"Standard"</strong> to <strong>"Go Deeper"</strong> for Class 3B.
       </p>
     </div>
     <div style="display:flex;justify-content:flex-end">
@@ -11984,14 +11957,15 @@ function _showPacingLessonModal(unitId, si, li) {
       <div style="background:#f5f4f3;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
         <div style="display:flex;gap:10px;align-items:flex-start">
           <span style="font-size:12px;font-weight:700;background:#203C53;color:#fff;padding:2px 8px;border-radius:20px;flex-shrink:0;margin-top:1px">Core</span>
-          <span>Follows the standard curriculum you're already familiar with.</span>
+          <span>Follows the standard curriculum your students are already working through. This is the default for all classes.</span>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
           <span style="font-size:12px;font-weight:700;background:#065F46;color:#fff;padding:2px 8px;border-radius:20px;flex-shrink:0;margin-top:1px">Go Deeper</span>
-          <span>Marks 4 lessons as skippable and adds 4 enrichment lessons for challenge-ready students.</span>
+          <span>Marks 4 lessons as skippable and adds 4 enrichment lessons for classes that are ready for more challenge.</span>
         </div>
       </div>
-      <p style="margin:0">For every unit you teach, you can choose a version for each class.</p>
+      <p style="margin:0 0 8px">You can set a version <strong>per class, per unit</strong> — it's a whole-class setting. Once you make a change, all students in that class will see the updated view in their student portal.</p>
+      <p style="margin:0">Today, we'd like to see if our interface makes it easy to switch between these two versions.</p>
     </div>
   </div>
 </div>
@@ -12004,10 +11978,10 @@ function _showPacingLessonModal(unitId, si, li) {
     </div>
     <div style="background:#EEF8FA;border:1.5px solid #B3DDE8;border-radius:10px;padding:16px 18px;margin-bottom:20px">
       <p style="font-size:14px;color:#203C53;line-height:1.65;margin:0">
-        You are teaching <strong>class 3A</strong> and <strong>class 3B</strong>. You realize that <strong>class 3B</strong> has been doing really well with Unit 3: Multiplication, and will need some extra challenge.
+        You just finished teaching Unit 1 to <strong>Class 3A</strong> and <strong>Class 3B</strong>. You realize that <strong>Class 3B</strong> has been doing really well, and will need some extra challenge for the next unit: <strong>Unit 2 — Multiplication</strong>.
       </p>
       <p style="font-size:14px;color:#203C53;line-height:1.65;margin:12px 0 0">
-        Find <strong>Class 3B's curriculum</strong>, find <strong>Unit 2</strong>, and switch <strong>"Standard"</strong> to <strong>"Go Deeper"</strong> for your students.
+        Find <strong>Class 3B's curriculum</strong>, find <strong>Unit 2</strong>, and switch <strong>"Standard"</strong> to <strong>"Go Deeper"</strong> for Class 3B.
       </p>
     </div>
     <div style="border-top:1px solid #ebe9e5;padding-top:16px;display:flex;justify-content:space-between;align-items:center">
@@ -12336,10 +12310,10 @@ function utGetLabel(el) {
     'lmb-curriculum':   'Left nav: Curriculum',
     'lmb-home':         'Left nav: Home',
     'lmb-reports':      'Left nav: Reports',
-    'lmb-classes':      'Left nav: Classes',
+    'lmb-classes':      'Left nav: Settings',
     'curr-tab-3a':      'Tab: Class 3A',
     'curr-tab-3b':      'Tab: Class 3B',
-    'curr-tab-full':    'Tab: Full Curriculum',
+    'curr-tab-full':    'Tab: Curriculum Catalog',
   };
 
   var id = el.id || '';
