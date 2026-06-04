@@ -7981,7 +7981,7 @@ function markDig(verdict){
     a.qs[ctx.qi]=val;
   }
   resetGradeBtns(verdict);
-  setTimeout(function(){closeDig();renderTable();updateCRBanner();utCheckTask3Complete();utTriggerTask4Check();},280);
+  setTimeout(function(){closeDig();renderTable();updateCRBanner();_updateProgressIndicator();utCheckTask3Complete();utTriggerTask4Check();},280);
 }
 
 /* ── MANUAL ENTRY MODAL ── */
@@ -7997,6 +7997,17 @@ function meClone(students){
 }
 
 function openManualEntry(){
+  // Task4: 只有Class 3B · Unit 2 · Unit Test才能Enter Paper Results
+  if (typeof utIsTask4Active === 'function' && utIsTask4Active()) {
+    var st = window._grpState;
+    if (!st || st.class !== 'class2' || st.selectedUnit !== 2 || st.selectedUnitSub !== 'eou') {
+      UT.task4ErrorCount++;
+      document.getElementById('ut-t4-error-msg').innerHTML =
+        'The task asks you to enter results for <strong>Class 3B · Unit 2 · Unit Test</strong>. Please navigate there first.';
+      document.getElementById('ut-modal-t4-error').style.display = 'flex';
+      return;
+    }
+  }
   meSnapshot = meClone(RPT_STUDENTS);
   if(meAutoSaved){
     /* restore autosaved progress */
@@ -8062,9 +8073,19 @@ function _updateProgressIndicator(){
       indicator.style.display = '';
     }
   } else {
-    if(label) label.textContent = 'Enter Paper Results';
+    /* 检查当前test里是否已有print attempt */
+    var hasPrint = RPT_STUDENTS && RPT_STUDENTS.some(function(s){
+      return s.attempts && s.attempts.some(function(a){ return a.mode === 'print'; });
+    });
+    if(label) label.textContent = hasPrint ? 'Edit Paper Results' : 'Enter Paper Results';
     if(icon){
-      icon.innerHTML = '<line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>';
+      if(hasPrint){
+        icon.innerHTML = '<path d="M11.5 2.5a2.121 2.121 0 013 3L6 14l-4 1 1-4 8.5-8.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+        icon.setAttribute('viewBox','0 0 16 16');
+      } else {
+        icon.innerHTML = '<line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>';
+        icon.setAttribute('viewBox','0 0 16 16');
+      }
     }
     if(indicator) indicator.style.display = 'none';
   }
@@ -8135,7 +8156,9 @@ function submitMe(){
     return;
   }
   // Task4: 在_commitSave前检查答案
-  var _t4Check = typeof utIsTask4Active === 'function' && utIsTask4Active();
+  var _t4Check = typeof utIsTask4Active === 'function' && utIsTask4Active()
+    && window._grpState && window._grpState.selectedUnitSub === 'eou'
+    && window._grpState.selectedUnit === 2 && window._grpState.class === 'class2';
   var _t4Snapshot = _t4Check && meWorking ? (typeof meClone === 'function' ? meClone(meWorking) : JSON.parse(JSON.stringify(meWorking))) : null;
   _commitSave();
   if (_t4Check && _t4Snapshot) {
@@ -13491,7 +13514,9 @@ function utCheckTask4Answer(snapshot) {
 
 function utTriggerTask4Check() {
   if (!utIsTask4Active()) return;
-  // 确认RPT_STUDENTS里有数据才判定（submit后才会有attempts）
+  // 只在 Class 3B · Unit 2 · Unit Test 才判定
+  var st = window._grpState;
+  if (!st || st.class !== 'class2' || st.selectedUnit !== 2 || st.selectedUnitSub !== 'eou') return;
   var sA = RPT_STUDENTS.find(function(s){ return s.id === 'sA'; });
   var sB = RPT_STUDENTS.find(function(s){ return s.id === 'sB'; });
   if (!sA || !sB || !sA.attempts || !sA.attempts[0] || !sB.attempts || !sB.attempts[0]) return;
