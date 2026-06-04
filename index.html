@@ -2253,8 +2253,7 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
       <span class="saved-msg" id="me-saved">✓ Saved</span>
       <div style="flex:1"></div>
       <button class="cancelbtn" onclick="cancelMe()">Cancel</button>
-      <button class="cancelbtn" onclick="saveProgressMe()" style="background:var(--blue-50);border-color:var(--navy-600);color:var(--navy-700)">Save Progress</button>
-      <button class="sbtn" onclick="submitMe()">Submit</button>
+      <button class="sbtn" onclick="submitMe()">Save</button>
     </div>
   </div>
 </div>
@@ -2280,23 +2279,20 @@ button { font-family: inherit; font-weight: inherit; font-stretch: inherit; }
 </div>
 
 <!-- DELETE PRINT ATTEMPT CONFIRMATION MODAL -->
-<div class="moverlay" id="del-overlay">
-  <div class="modal" style="width:380px" role="dialog" aria-modal="true">
-    <div class="mhd" style="background:var(--red-900)">
-      <h2 style="display:flex;align-items:center;gap:8px;color:#fff;font-size:15px;font-weight:700">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 4,4 14,4"/><path d="M5 4V2h6v2"/><path d="M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
-        Delete Print Attempt
-      </h2>
-      <button class="mcls" onclick="closeDel()">✕</button>
+<div class="moverlay" id="del-overlay" style="z-index:600">
+  <div class="modal" style="width:400px" role="dialog" aria-modal="true">
+    <div style="padding:24px 24px 0">
+      <div style="width:48px;height:48px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+        <svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="#CC000E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 4,4 14,4"/><path d="M5 4V2h6v2"/><path d="M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+      </div>
+      <div style="font-size:17px;font-weight:800;color:var(--t1);margin-bottom:8px">Delete Print Attempt</div>
+      <p id="del-msg" style="font-size:14px;color:var(--t2);line-height:1.6;margin:0 0 6px"></p>
+      <p style="font-size:13px;color:var(--t3);margin:0">This action cannot be undone.</p>
     </div>
-    <div class="mbody" style="padding:18px 20px">
-      <p id="del-msg" style="font-size:13px;color:var(--g800);line-height:1.6"></p>
-      <p style="font-size:12px;color:var(--g600);margin-top:8px">This action cannot be undone.</p>
-    </div>
-    <div class="mfooter" style="gap:10px">
+    <div class="mfooter" style="gap:10px;margin-top:24px">
       <div style="flex:1"></div>
       <button class="cancelbtn" onclick="closeDel()">Cancel</button>
-      <button class="sbtn" style="background:var(--red-600)" onclick="confirmDel()">Delete attempt</button>
+      <button onclick="confirmDel()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r);border:none;background:#CC000E;color:#fff;font-size:var(--rp-h7-c);font-weight:var(--rp-h7-w);cursor:pointer;transition:filter .12s" onmouseover="this.style.filter='brightness(.85)'" onmouseout="this.style.filter=''">Delete attempt</button>
     </div>
   </div>
 </div>
@@ -7985,7 +7981,7 @@ function markDig(verdict){
     a.qs[ctx.qi]=val;
   }
   resetGradeBtns(verdict);
-  setTimeout(function(){closeDig();renderTable();updateCRBanner();utCheckTask3Complete();},280);
+  setTimeout(function(){closeDig();renderTable();updateCRBanner();utCheckTask3Complete();utTriggerTask4Check();},280);
 }
 
 /* ── MANUAL ENTRY MODAL ── */
@@ -8138,46 +8134,12 @@ function submitMe(){
     document.getElementById('partial-overlay').classList.add('open');
     return;
   }
-  // Task4: 在_commitSave前检查答案（_commitSave后meWorking会被清空）
+  // Task4: 在_commitSave前检查答案
   var _t4Check = typeof utIsTask4Active === 'function' && utIsTask4Active();
   var _t4Snapshot = _t4Check && meWorking ? (typeof meClone === 'function' ? meClone(meWorking) : JSON.parse(JSON.stringify(meWorking))) : null;
   _commitSave();
   if (_t4Check && _t4Snapshot) {
-    setTimeout(function() {
-      var sA = _t4Snapshot.find(function(s){ return s.id === 'sA'; });
-      var sB = _t4Snapshot.find(function(s){ return s.id === 'sB'; });
-      var errors = [];
-      if (sA && sA.attempts[0]) {
-        var aA = sA.attempts[0];
-        if (aA.ver !== 'A') errors.push('Student A version should be <strong>A</strong>');
-        var qA = aA.qs;
-        if (qA[0] !== 'incorrect') errors.push('Student A Q1 should be <strong>incorrect ❌</strong>');
-        if (qA[1] !== null) errors.push('Student A Q2 should be <strong>blank (no answer)</strong>');
-        if (qA[2] !== 'correct') errors.push('Student A Q3 should be <strong>correct ✅</strong>');
-        if (qA[3] !== 'incorrect') errors.push('Student A Q4 should be <strong>incorrect ❌</strong>');
-        if (qA[4] !== 'incorrect') errors.push('Student A Q5 should be <strong>incorrect ❌</strong>');
-        if (qA[5] !== 'correct') errors.push('Student A Q6 should be <strong>correct ✅</strong>');
-      }
-      if (sB && sB.attempts[0]) {
-        var aB = sB.attempts[0];
-        if (aB.ver !== 'B') errors.push('Student B version should be <strong>B</strong>');
-        var qB = aB.qs;
-        if (qB[0] !== 'incorrect') errors.push('Student B Q1 should be <strong>incorrect ❌</strong>');
-        if (qB[1] !== 'correct') errors.push('Student B Q2 should be <strong>correct ✅</strong>');
-        if (qB[2] !== 'correct') errors.push('Student B Q3 should be <strong>correct ✅</strong>');
-        if (qB[3] !== 'correct') errors.push('Student B Q4 should be <strong>correct ✅</strong>');
-        if (qB[4] !== 'correct') errors.push('Student B Q5 should be <strong>correct ✅</strong>');
-        if (qB[5] !== null) errors.push('Student B Q6 should be <strong>blank (no answer)</strong>');
-      }
-      if (errors.length === 0) {
-        document.getElementById('ut-float-btns-t4').style.display = 'none';
-        document.getElementById('ut-modal-t4-complete').style.display = 'flex';
-      } else {
-        UT.task4ErrorCount++;
-        document.getElementById('ut-t4-error-msg').innerHTML = errors.join('<br>');
-        document.getElementById('ut-modal-t4-error').style.display = 'flex';
-      }
-    }, 400);
+    setTimeout(function() { utCheckTask4Answer(_t4Snapshot); }, 400);
   }
 }
 function discardMe(){ cancelMe(); }
@@ -8402,6 +8364,10 @@ function renderMeRows(){
 }
 
 function scrollToAndFlashCR(qi){
+  // Task3: 记录banner点击次数
+  if (typeof utIsTask3Active === 'function' && utIsTask3Active()) {
+    UT.task3BannerClicks = (UT.task3BannerClicks || 0) + 1;
+  }
   /* Find all td cells in that column index (qi maps to col index: name=0,ver=1,tot=2,q0=3...) */
   var colIdx = 3 + qi; /* 0=name,1=ver,2=tot, then questions start */
   var twrap = document.querySelector('.twrap');
@@ -8798,9 +8764,11 @@ function confirmDel(){
   var s = RPT_STUDENTS.find(function(r){return r.id===delCtx.sid;});
   if(s){
     s.attempts.splice(delCtx.aidx, 1);
-    /* collapse if no more sub-rows */
     if(s.attempts.length <= 1) delete expanded[s.id];
   }
+  // 清除autosave，避免重新打开Enter Paper Results时恢复已删除的数据
+  meAutoSaved = null;
+  meAutoSavedTime = null;
   closeDel();
   renderTable();
 }
@@ -13204,7 +13172,7 @@ function utSubmitTask3() {
 
 <!-- ── TASK 4 INSTRUCTION MODAL ── -->
 <div id="ut-modal-t4-instruction" style="display:none" class="ut-modal-backdrop">
-  <div class="ut-modal">
+  <div class="ut-modal" style="max-width:780px;width:95vw;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
       <div style="width:40px;height:40px;border-radius:50%;background:#EEF8FA;display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <svg viewBox="0 0 18 18" style="width:18px;height:18px;fill:none;stroke:#005B8E;stroke-width:1.8;stroke-linecap:round"><rect x="2" y="2" width="14" height="14" rx="2"/><line x1="5" y1="7" x2="13" y2="7"/><line x1="5" y1="10" x2="13" y2="10"/><line x1="5" y1="13" x2="9" y2="13"/></svg>
@@ -13230,6 +13198,12 @@ function utSubmitTask3() {
             <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q4</th>
             <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q5</th>
             <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q6</th>
+            <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q7</th>
+            <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q8</th>
+            <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q9</th>
+            <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q10</th>
+            <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q11</th>
+            <th style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q12</th>
           </tr>
         </thead>
         <tbody>
@@ -13242,12 +13216,24 @@ function utSubmitTask3() {
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">❌</td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">❌</td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8"></td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8"></td>
           </tr>
           <tr style="background:#f8fafc">
             <td style="padding:7px 10px;border:1px solid #B3DDE8;font-weight:600">Student B</td>
             <td style="padding:7px 10px;border:1px solid #B3DDE8">Ver.B</td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">❌</td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8"></td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8"></td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8"></td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
             <td style="padding:7px 10px;text-align:center;border:1px solid #B3DDE8">✅</td>
@@ -13290,57 +13276,69 @@ function utSubmitTask3() {
 </div>
 
 <!-- ── TASK 4 INLINE INSTRUCTION ── -->
-<div id="ut-modal-t4-instruction-inline" style="display:none" class="ut-modal-backdrop">
-  <div class="ut-modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div style="font-size:16px;font-weight:800;color:#203C53">Task 4 Instructions</div>
-      <button onclick="document.getElementById('ut-modal-t4-instruction-inline').style.display='none'" style="width:28px;height:28px;border-radius:50%;border:none;background:#f1f0ee;cursor:pointer;font-size:16px;color:#525152;display:flex;align-items:center;justify-content:center">×</button>
+<div id="ut-modal-t4-instruction-inline" style="display:none;position:fixed;bottom:24px;left:24px;z-index:99980;max-width:520px;width:calc(100vw - 48px);background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.13);border:1.5px solid #B3DDE8;overflow:hidden">
+  <div style="background:#EEF8FA;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #B3DDE8">
+    <div style="font-size:12px;font-weight:700;color:#005B8E;letter-spacing:.04em;text-transform:uppercase">Class 3B · Unit 2 Unit Test Score</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="ut-btn-danger" style="font-size:11px;padding:4px 12px" onclick="utRequestEndTask()">End Task</button>
+      <button onclick="document.getElementById('ut-modal-t4-instruction-inline').style.display='none'" style="width:24px;height:24px;border-radius:50%;border:none;background:#d4eef4;cursor:pointer;font-size:14px;color:#005B8E;display:flex;align-items:center;justify-content:center;flex-shrink:0">×</button>
     </div>
-    <div style="background:#EEF8FA;border:1.5px solid #B3DDE8;border-radius:10px;padding:16px 18px;margin-bottom:20px">
-      <p style="font-size:14px;color:#203C53;line-height:1.65;margin:0 0 12px">
-        <strong>Class 3B</strong> just finished the <strong>Unit 2 Unit Test on paper</strong>. Enter the following scores:
-      </p>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;color:#203C53">
-        <thead>
-          <tr style="background:#D4EEF4">
-            <th style="padding:5px 8px;text-align:left;border:1px solid #B3DDE8;font-weight:700">Student</th>
-            <th style="padding:5px 8px;text-align:left;border:1px solid #B3DDE8;font-weight:700">Ver</th>
-            <th style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q1</th>
-            <th style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q2</th>
-            <th style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q3</th>
-            <th style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q4</th>
-            <th style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q5</th>
-            <th style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q6</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="background:#fff">
-            <td style="padding:5px 8px;border:1px solid #B3DDE8;font-weight:600">Student A</td>
-            <td style="padding:5px 8px;border:1px solid #B3DDE8">Ver.A</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">❌</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8"></td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">✅</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">❌</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">❌</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">✅</td>
-          </tr>
-          <tr style="background:#f8fafc">
-            <td style="padding:5px 8px;border:1px solid #B3DDE8;font-weight:600">Student B</td>
-            <td style="padding:5px 8px;border:1px solid #B3DDE8">Ver.B</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">❌</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">✅</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">✅</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">✅</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8">✅</td>
-            <td style="padding:5px 8px;text-align:center;border:1px solid #B3DDE8"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="border-top:1px solid #ebe9e5;padding-top:16px;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;color:#9d9b96">Can't complete the task?</span>
-      <button class="ut-btn-danger" style="font-size:13px;padding:8px 18px" onclick="document.getElementById('ut-modal-t4-instruction-inline').style.display='none';utRequestEndTask()">End Task</button>
-    </div>
+  </div>
+  <div style="padding:10px 14px;overflow-x:auto">
+    <table style="border-collapse:collapse;font-size:12px;color:#203C53;white-space:nowrap">
+      <thead>
+        <tr style="background:#D4EEF4">
+          <th style="padding:4px 7px;text-align:left;border:1px solid #B3DDE8;font-weight:700">Student</th>
+          <th style="padding:4px 7px;text-align:left;border:1px solid #B3DDE8;font-weight:700">Ver</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q1</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q2</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q3</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q4</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q5</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q6</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q7</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q8</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q9</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q10</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q11</th>
+          <th style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8;font-weight:700">Q12</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#fff">
+          <td style="padding:4px 7px;border:1px solid #B3DDE8;font-weight:600">Student A</td>
+          <td style="padding:4px 7px;border:1px solid #B3DDE8">Ver.A</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">❌</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">❌</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">❌</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+        </tr>
+        <tr style="background:#f8fafc">
+          <td style="padding:4px 7px;border:1px solid #B3DDE8;font-weight:600">Student B</td>
+          <td style="padding:4px 7px;border:1px solid #B3DDE8">Ver.B</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">❌</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8">✅</td>
+          <td style="padding:4px 7px;text-align:center;border:1px solid #B3DDE8"></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -13409,7 +13407,7 @@ function utSubmitTask3() {
 
 <!-- ── TASK 4 FLOATING BUTTONS ── -->
 <div id="ut-float-btns-t4" style="display:none;position:fixed;bottom:24px;right:24px;z-index:99990;flex-direction:column;gap:8px;align-items:flex-end">
-  <button class="ut-float-btn ut-float-btn-task" onclick="document.getElementById('ut-modal-t4-instruction-inline').style.display='flex'">
+  <button class="ut-float-btn ut-float-btn-task" onclick="document.getElementById('ut-modal-t4-instruction-inline').style.display='block'">
     <svg viewBox="0 0 14 14" style="width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><rect x="1" y="1" width="12" height="12" rx="1.5"/><line x1="4" y1="5" x2="10" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="11" x2="7" y2="11"/></svg>
     Task 4 Instructions
   </button>
@@ -13437,11 +13435,76 @@ function utBeginTask4() {
     grpSetUnitSub('eou');
     window._ut_skip_task2_check = false;
     document.getElementById('ut-float-btns-t4').style.display = 'flex';
+    // 自动显示左下角参考面板
+    document.getElementById('ut-modal-t4-instruction-inline').style.display = 'block';
   }, 150);
 }
 function utIsTask4Active() {
   var el = document.getElementById('ut-float-btns-t4');
   return el && el.style.display !== 'none';
+}
+
+function utCheckTask4Answer(snapshot) {
+  // Q1-Q10 = qs[0]-qs[9], Q11-Q12 = cr[0]-cr[1]
+  // Student A Ver.A: Q1=incorrect,Q2=null,Q3=correct,Q4=incorrect,Q5=incorrect,
+  //                  Q6=correct,Q7=null,Q8=correct,Q9=correct,Q10=correct,Q11=correct,Q12=null
+  var ansA_qs = ['incorrect',null,'correct','incorrect','incorrect','correct',null,'correct','correct','correct'];
+  var ansA_cr = ['correct', null];
+  // Student B Ver.B: Q1=incorrect,Q2=correct,Q3=correct,Q4=correct,Q5=correct,
+  //                  Q6=null,Q7=null,Q8=null,Q9=correct,Q10=correct,Q11=correct,Q12=null
+  var ansB_qs = ['incorrect','correct','correct','correct','correct',null,null,null,'correct','correct'];
+  var ansB_cr = ['correct', null];
+
+  var sA = snapshot.find(function(s){ return s.id === 'sA'; });
+  var sB = snapshot.find(function(s){ return s.id === 'sB'; });
+  var errors = [];
+
+  function checkStudent(label, attempt, ans_qs, ans_cr, ver) {
+    if (!attempt) { errors.push(label + ' has no data entered'); return; }
+    if (attempt.ver !== ver) errors.push(label + ' version should be <strong>' + ver + '</strong>');
+    var qs = attempt.qs || [];
+    ans_qs.forEach(function(expected, i) {
+      var actual = qs[i] !== undefined ? qs[i] : null;
+      if (actual !== expected) {
+        var expStr = expected === null ? 'blank' : expected === 'correct' ? 'correct ✅' : 'incorrect ❌';
+        var actStr = actual === null ? 'blank' : actual === 'correct' ? 'correct ✅' : actual === 'incorrect' ? 'incorrect ❌' : String(actual);
+        errors.push(label + ' Q' + (i+1) + ': expected <strong>' + expStr + '</strong>, got ' + actStr);
+      }
+    });
+    var cr = Array.isArray(attempt.cr) ? attempt.cr : [attempt.cr];
+    ans_cr.forEach(function(expected, i) {
+      var actual = cr[i] !== undefined ? cr[i] : null;
+      if (actual !== expected) {
+        var expStr = expected === null ? 'blank' : expected === 'correct' ? 'correct ✅' : 'incorrect ❌';
+        var actStr = actual === null ? 'blank' : actual === 'correct' ? 'correct ✅' : actual === 'incorrect' ? 'incorrect ❌' : String(actual);
+        errors.push(label + ' Q' + (ans_qs.length + i + 1) + ': expected <strong>' + expStr + '</strong>, got ' + actStr);
+      }
+    });
+  }
+
+  if (sA) checkStudent('Student A', sA.attempts && sA.attempts[0], ansA_qs, ansA_cr, 'A');
+  else errors.push('Student A has no data entered');
+  if (sB) checkStudent('Student B', sB.attempts && sB.attempts[0], ansB_qs, ansB_cr, 'B');
+  else errors.push('Student B has no data entered');
+
+  if (errors.length === 0) {
+    document.getElementById('ut-float-btns-t4').style.display = 'none';
+    document.getElementById('ut-modal-t4-instruction-inline').style.display = 'none';
+    document.getElementById('ut-modal-t4-complete').style.display = 'flex';
+  } else {
+    UT.task4ErrorCount++;
+    document.getElementById('ut-t4-error-msg').innerHTML = errors.join('<br>');
+    document.getElementById('ut-modal-t4-error').style.display = 'flex';
+  }
+}
+
+function utTriggerTask4Check() {
+  if (!utIsTask4Active()) return;
+  // 确认RPT_STUDENTS里有数据才判定（submit后才会有attempts）
+  var sA = RPT_STUDENTS.find(function(s){ return s.id === 'sA'; });
+  var sB = RPT_STUDENTS.find(function(s){ return s.id === 'sB'; });
+  if (!sA || !sB || !sA.attempts || !sA.attempts[0] || !sB.attempts || !sB.attempts[0]) return;
+  utCheckTask4Answer(RPT_STUDENTS);
 }
 var _t4Rating = null;
 var _t4Rating2 = null;
@@ -13635,7 +13698,7 @@ function utShowWrongTargetHint() {
 // ── Configuration ──────────────────────────────────────────
 // REPLACE this URL with your actual Google Apps Script Web App URL
 // Deploy as: "Execute as Me", "Who has access: Anyone"
-const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzDMSw8RFJWqtJ5B1rz-RHFrp7EsA5ccsf9rSwMtDzGbUNaOg9cgeriu_Rrdh2jWktI/exec';
+const UT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwAW2DVaVU_LRm0pCyuKVnKGaEgXxyxyuEPNdm-r2GL_9Q-xdma1E4KoQnqNPsGQKhhdA/exec';
 
 // ── Session state ──────────────────────────────────────────
 var UT = {
@@ -13662,6 +13725,7 @@ var UT = {
   task3AbandonReason: '',
   task3FreeResponse: '',
   task3ErrorCount: 0,
+  task3BannerClicks: 0,
   task4Status: 'not_started',
   task4Rating1: null,
   task4Rating2: null,
@@ -14104,6 +14168,7 @@ function utSendTask3Data() {
     task3AbandonReason: UT.task3AbandonReason || '',
     task3FreeResponse:  UT.task3FreeResponse || '',
     task3ErrorCount:    UT.task3ErrorCount || 0,
+    task3BannerClicks:  UT.task3BannerClicks || 0,
     totalClicks:        UT.totalClicks,
     clickLog:           utBuildClickLog(),
   });
