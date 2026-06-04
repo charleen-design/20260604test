@@ -7997,6 +7997,14 @@ function meClone(students){
 }
 
 function openManualEntry(){
+  // Task3: 进行中不允许打开Enter Paper Results
+  if (typeof utIsTask3Active === 'function' && utIsTask3Active()) {
+    UT.task3ErrorCount++;
+    document.getElementById('ut-t3-error-msg').innerHTML =
+        'Students A and B completed this assessment <strong>digitally</strong> — there\'s no need to enter paper results. Try looking for another way to grade the free response question.';
+    document.getElementById('ut-modal-t3-error').style.display = 'flex';
+    return;
+  }
   // Task4: 只有Class 3B · Unit 2 · Unit Test才能Enter Paper Results
   if (typeof utIsTask4Active === 'function' && utIsTask4Active()) {
     var st = window._grpState;
@@ -12713,7 +12721,7 @@ function _showPacingLessonModal(unitId, si, li) {
 <div id="ut-modal-rating" style="display:none" class="ut-modal-backdrop">
   <div class="ut-modal" style="text-align:center;max-width:420px">
     <div style="font-size:11px;font-weight:600;color:#9d9b96;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Task 1 Feedback</div>
-    <h2 style="font-size:20px;font-weight:800;color:#203C53;margin:0 0 8px;letter-spacing:-.01em">How intuitive and easy was it to switch unit version for a class?</h2>
+    <h2 style="font-size:20px;font-weight:800;color:#203C53;margin:0 0 8px;letter-spacing:-.01em">How intuitive and easy was it to <strong>switch unit version for a class</strong>?</h2>
     <p style="font-size:14px;color:#777674;margin:0 0 24px;line-height:1.5">1 star = Very difficult &nbsp;·&nbsp; 5 stars = Very easy</p>
     <div class="ut-stars" id="ut-stars-container" style="justify-content:center;margin-bottom:24px">
       <span class="ut-star" data-v="1" onclick="utSetRating(1)">★</span>
@@ -12853,7 +12861,9 @@ function utClearAllTaskUI() {
   document.querySelectorAll('.moverlay.open').forEach(function(el){
     el.classList.remove('open');
   });
-  // 重置所有rating星星和状态
+  // 隐藏Task4左下角参考面板
+  var t4panel = document.getElementById('ut-modal-t4-instruction-inline');
+  if (t4panel) t4panel.style.display = 'none';
   ['ut-t2-stars','ut-t3-stars','ut-t3-stars2','ut-t4-stars','ut-t4-stars2'].forEach(function(id){
     var container = document.getElementById(id);
     if (container) {
@@ -12997,6 +13007,9 @@ function utSubmitTask1Feedback() {
       </div>
     </div>
     <div style="background:#EEF8FA;border:1.5px solid #B3DDE8;border-radius:10px;padding:16px 18px;margin-bottom:24px">
+      <p style="font-size:15px;color:#203C53;line-height:1.65;margin:0 0 14px">
+        Class 3B just finished a Checkpoint assessment for Unit 2 on the Student Portal.
+      </p>
       <p style="font-size:15px;color:#203C53;line-height:1.65;margin:0 0 14px">
         <strong>Class 3B's Unit 2 Checkpoint</strong> assessment includes one free response question that requires <strong>manual grading</strong>.
       </p>
@@ -13619,7 +13632,7 @@ function utSubmitTask4() {
 <div id="ut-modal-t2-rating" style="display:none" class="ut-modal-backdrop">
   <div class="ut-modal" style="text-align:center;max-width:420px">
     <div style="font-size:11px;font-weight:600;color:#9d9b96;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Task 2 Feedback</div>
-    <h2 style="font-size:20px;font-weight:800;color:#203C53;margin:0 0 8px;letter-spacing:-.01em">How intuitive and easy was it to find Class 3B's Unit 2 Checkpoint report?</h2>
+    <h2 style="font-size:20px;font-weight:800;color:#203C53;margin:0 0 8px;letter-spacing:-.01em">How intuitive and easy was it to <strong>find Class 3B's Unit 2 Checkpoint report</strong>?</h2>
     <p style="font-size:14px;color:#777674;margin:0 0 24px;line-height:1.5">1 star = Very difficult &nbsp;·&nbsp; 5 stars = Very easy</p>
     <div class="ut-stars" id="ut-t2-stars" style="justify-content:center;margin-bottom:24px">
       <span class="ut-star" data-v="1" onclick="utSetTask2Rating(1)">★</span>
